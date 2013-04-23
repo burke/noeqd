@@ -74,6 +74,10 @@ func mustListen() net.Listener {
 }
 
 func acceptAndServe(l net.Listener) {
+	bucket := make(chan bool, 230)
+	for i := 0; i < cap(bucket); i++ {
+		bucket <- true
+	}
 	for {
 		cn, err := l.Accept()
 		if err != nil {
@@ -81,6 +85,8 @@ func acceptAndServe(l net.Listener) {
 		}
 
 		go func() {
+			<- bucket
+			defer bucket <- true
 			err := serve(cn, cn)
 			if err != io.EOF {
 				log.Println(err)
