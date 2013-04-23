@@ -79,13 +79,13 @@ func acceptAndServe(l net.Listener) {
 		bucket <- true
 	}
 	for {
+		<- bucket
 		cn, err := l.Accept()
 		if err != nil {
 			log.Println(err)
 		}
 
 		go func() {
-			<- bucket
 			defer bucket <- true
 			err := serve(cn, cn)
 			if err != io.EOF {
